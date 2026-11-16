@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&gclid&fbclid&etext&from&ref /
+
+User-agent: Yandex
+Allow: /
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&gclid&fbclid&etext&from&ref /
+
+Sitemap: https://webzveno.github.io/sitemap.xml

@@ -1,0 +1,14 @@
+title: Утилиты Онлайн — бесплатные калькуляторы, генераторы и конвертеры
+description: Быстрые онлайн-инструменты для бизнеса, финансов, работы с текстом, изображениями и повседневных задач. Работают прямо в браузере без регистрации.
+lang: ru
+url: "https://webzveno.github.io"
+baseurl: ""
+
+plugins:
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: null

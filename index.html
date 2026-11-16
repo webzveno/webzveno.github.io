@@ -1,0 +1,637 @@
+---
+layout: null
+---
+{%- assign all_apps = site.pages | where_exp: "p", "p.path contains 'apps/'" -%}
+{%- assign ordered_apps = all_apps | where_exp: "p", "p.order" | sort: "order" -%}
+{%- assign other_apps = all_apps | where_exp: "p", "p.order == nil" | sort: "title" -%}
+{%- assign apps = ordered_apps | concat: other_apps -%}
+{%- assign categories = all_apps | map: "category" | compact | uniq | sort -%}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#005bff">
+    <title>{{ site.title }}</title>
+    <meta name="description" content="{{ site.description }}">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+     <link rel="icon" href="https://webzveno.github.io/favicon.png" type="image/png">
+    <link rel="canonical" href="{{ '/' | absolute_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ site.title }}">
+    <meta property="og:description" content="{{ site.description }}">
+    <meta property="og:url" content="{{ '/' | absolute_url }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": {{ site.title | jsonify }},
+          "url": {{ '/' | absolute_url | jsonify }},
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "{{ '/' | absolute_url }}?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "ItemList",
+          "name": "Каталог онлайн-инструментов",
+          "numberOfItems": {{ apps.size }},
+          "itemListElement": [
+            {%- for app in apps -%}
+            {
+              "@type": "ListItem",
+              "position": {{ forloop.index }},
+              "name": {{ app.title | default: app.name | jsonify }},
+              "url": {{ app.url | absolute_url | jsonify }}
+            }{% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #005bff;
+            --primary-hover: #0046c7;
+            --bg: #f4f5f7;
+            --card: #ffffff;
+            --text: #1a1d20;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+            --shadow-hover: 0 10px 25px rgba(0, 91, 255, 0.12);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            --shadow-hover: 0 10px 25px rgba(0, 91, 255, 0.25);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0 0 48px;
+            line-height: 1.5;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-inner {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            background: var(--primary);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .burger-btn { display: none; }
+
+        .mobile-drawer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+        }
+        .mobile-drawer-overlay.open { display: block; }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            left: -290px;
+            width: 280px;
+            height: 100%;
+            background: var(--card);
+            z-index: 201;
+            padding: 20px 16px;
+            overflow-y: auto;
+            transition: left 0.25s ease;
+            border-right: 1px solid var(--border);
+        }
+        .mobile-drawer.open { left: 0; }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+        }
+
+        .drawer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .drawer-item {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .drawer-item.active {
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 16px 0; }
+
+        header.hero { text-align: center; margin-bottom: 24px; }
+        h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.02em; }
+        .subtitle { color: var(--muted); font-size: 15px; margin: 0 auto 20px; max-width: 600px; }
+
+        .search-box {
+            max-width: 560px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 44px 14px 16px;
+            font-size: 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            box-shadow: var(--shadow);
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--primary); }
+
+        .search-kbd {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-size: 12px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .cat-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .cat-pill {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 99px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .cat-pill:hover { border-color: var(--primary); }
+        .cat-pill.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: var(--shadow);
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            border: 1px solid var(--border);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+
+        .card.hidden { display: none; }
+
+        .fav-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--muted);
+            opacity: 0.5;
+            padding: 4px;
+            z-index: 2;
+        }
+        .fav-btn.active { opacity: 1; color: #f59e0b; }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-icon { font-size: 32px; line-height: 1; }
+        .card-icon img { width: 32px; height: 32px; object-fit: contain; }
+
+        .card-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--muted);
+        }
+
+        .card-title { font-size: 17px; font-weight: 700; margin: 0 0 6px; padding-right: 20px; }
+        .card-desc { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.45; }
+
+        .rsy-slot {
+            min-height: 90px;
+            margin: 28px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .seo-block {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 32px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .seo-block h2 { font-size: 18px; color: var(--text); margin: 0 0 8px; }
+
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+
+        footer {
+            text-align: center;
+            margin-top: 36px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .cookie-bar {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            max-width: 540px;
+            margin: 0 auto;
+            background: var(--card);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 300;
+            font-size: 13px;
+        }
+        .cookie-bar button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .burger-btn { display: inline-flex; }
+            .cat-tabs { display: none; }
+            .search-kbd { display: none; }
+            h1 { font-size: 23px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="logo" href="{{ '/' | relative_url }}">Web Zveno<span>Утилиты</span></a>
+            <div class="nav-controls">
+                <button class="btn-icon burger-btn" id="openDrawer" type="button">☰ Категории</button>
+                <button class="btn-icon" id="themeToggle" type="button" aria-label="Сменить тему">🌓</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
+
+    <aside class="mobile-drawer" id="mobileDrawer">
+        <div class="drawer-header">
+            <span>Категории сервисов</span>
+            <button class="btn-icon" id="closeDrawer" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="drawer-list">
+            <button class="drawer-item active" data-cat="all" type="button">
+                <span>Все инструменты</span><span>{{ apps.size }}</span>
+            </button>
+            <button class="drawer-item" data-cat="fav" type="button">
+                <span>★ Избранное</span><span id="favCountMob">0</span>
+            </button>
+            {%- for cat in categories -%}
+                {%- assign cat_count = all_apps | where: "category", cat | size -%}
+                <button class="drawer-item" data-cat="{{ cat }}" type="button">
+                    <span>{{ cat }}</span><span>{{ cat_count }}</span>
+                </button>
+            {%- endfor -%}
+        </div>
+    </aside>
+
+    <main class="wrap">
+        <header class="hero">
+            <h1>Онлайн-инструменты и калькуляторы</h1>
+            <p class="subtitle">Быстрые бесплатные сервисы для расчетов, текста, изображений и бизнеса. Работают мгновенно прямо в браузере.</p>
+
+            <div class="search-box">
+                <input type="search" class="search-input" id="searchInput" placeholder="Поиск инструмента…" autocomplete="off">
+                <kbd class="search-kbd">/</kbd>
+            </div>
+
+            <div class="cat-tabs">
+                <button class="cat-pill active" data-cat="all" type="button">Все ({{ apps.size }})</button>
+                <button class="cat-pill" data-cat="fav" type="button">★ Избранное (<span id="favCountDesk">0</span>)</button>
+                {%- for cat in categories -%}
+                    {%- assign cat_count = all_apps | where: "category", cat | size -%}
+                    <button class="cat-pill" data-cat="{{ cat }}" type="button">{{ cat }} ({{ cat_count }})</button>
+                {%- endfor -%}
+            </div>
+        </header>
+
+        <div class="rsy-slot" id="yandex_rtb_home"></div>
+
+        {%- if apps.size == 0 -%}
+            <div class="empty-state">
+                <p>Пока нет приложений. Добавьте <code>.html</code> файл в папку <code>apps/</code>.</p>
+            </div>
+        {%- else -%}
+            <div class="grid" id="appsGrid">
+                {%- for app in apps -%}
+                    {%- assign app_title = app.title | default: app.name | default: "Без названия" -%}
+                    {%- assign app_desc  = app.description | default: app.desc -%}
+                    {%- assign app_icon  = app.icon | default: "📱" -%}
+                    {%- assign app_cat   = app.category | default: "Разное" -%}
+                    <a class="card"
+                       href="{{ app.url | relative_url }}"
+                       data-url="{{ app.url | relative_url }}"
+                       data-cat="{{ app_cat }}"
+                       data-search="{{ app_title | downcase }} {{ app_desc | default: '' | downcase }} {{ app_cat | downcase }} {{ app.keywords | default: '' | downcase }}">
+                        <button class="fav-btn" type="button" data-fav-url="{{ app.url | relative_url }}" aria-label="В избранное">★</button>
+                        <div class="card-top">
+                            <span class="card-icon">
+                                {%- if app_icon contains '/' or app_icon contains 'http' -%}
+                                    <img src="{{ app_icon }}" alt="" loading="lazy" decoding="async">
+                                {%- else -%}
+                                    {{ app_icon }}
+                                {%- endif -%}
+                            </span>
+                            <span class="card-badge">{{ app_cat }}</span>
+                        </div>
+                        <h3 class="card-title">{{ app_title }}</h3>
+                        {%- if app_desc -%}
+                            <p class="card-desc">{{ app_desc }}</p>
+                        {%- endif -%}
+                    </a>
+                {%- endfor -%}
+            </div>
+            <div id="noResults" class="empty-state" style="display:none;">
+                <p>По вашему запросу ничего не найдено. Попробуйте изменить формулировку или выбрать другую категорию.</p>
+            </div>
+        {%- endif -%}
+
+        <section class="seo-block">
+            <h2>Бесплатные веб-сервисы без регистрации</h2>
+            <p>Все калькуляторы, конвертеры и генераторы на портале работают локально в вашем браузере. Мы не передаем введенные тексты, цифры и файлы на сторонние серверы — это гарантирует мгновенную скорость работы на смартфонах и компьютерах, а также полную конфиденциальность ваших данных.</p>
+        </section>
+
+        <footer>
+            <p>© {{ 'now' | date: "%Y" }} Утилиты Онлайн. Все инструменты предоставляются бесплатно в справочных целях.</p>
+        </footer>
+    </main>
+
+    <div class="cookie-bar" id="cookieBar">
+        <span>Мы используем файлы cookie и localStorage для сохранения ваших настроек и избранных сервисов.</span>
+        <button id="acceptCookie" type="button">Понятно</button>
+    </div>
+
+    <script>
+    (function () {
+        // 1. Тема
+        const root = document.documentElement;
+        if (localStorage.getItem('theme') === 'dark') root.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const isDark = root.getAttribute('data-theme') === 'dark';
+            root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        });
+
+        // 2. Бургер-меню
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        const toggleDrawer = (open) => {
+            drawer.classList.toggle('open', open);
+            overlay.classList.toggle('open', open);
+        };
+        document.getElementById('openDrawer').addEventListener('click', () => toggleDrawer(true));
+        document.getElementById('closeDrawer').addEventListener('click', () => toggleDrawer(false));
+        overlay.addEventListener('click', () => toggleDrawer(false));
+
+        // 3. Избранное, поиск, фильтрация
+        let favs = JSON.parse(localStorage.getItem('fav_apps') || '[]');
+        let currentCat = 'all';
+        const cards = Array.from(document.querySelectorAll('.card'));
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+
+        function updateFavUI() {
+            document.getElementById('favCountDesk').textContent = favs.length;
+            document.getElementById('favCountMob').textContent = favs.length;
+            document.querySelectorAll('.fav-btn').forEach(btn => {
+                btn.classList.toggle('active', favs.includes(btn.dataset.favUrl));
+            });
+        }
+
+        document.querySelectorAll('.fav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = btn.dataset.favUrl;
+                favs = favs.includes(url) ? favs.filter(u => u !== url) : [...favs, url];
+                localStorage.setItem('fav_apps', JSON.stringify(favs));
+                updateFavUI();
+                if (currentCat === 'fav') filterCards();
+            });
+        });
+
+        function filterCards() {
+            const q = searchInput.value.trim().toLowerCase();
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const matchCat = currentCat === 'all'
+                    || (currentCat === 'fav' && favs.includes(card.dataset.url))
+                    || card.dataset.cat === currentCat;
+                const matchSearch = !q || card.dataset.search.includes(q);
+                const show = matchCat && matchSearch;
+                card.classList.toggle('hidden', !show);
+                if (show) visibleCount++;
+            });
+            if (noResults) noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        function setCategory(cat) {
+            currentCat = cat;
+            document.querySelectorAll('[data-cat]').forEach(el => {
+                el.classList.toggle('active', el.dataset.cat === cat);
+            });
+            filterCards();
+            toggleDrawer(false);
+        }
+
+        document.querySelectorAll('[data-cat]').forEach(btn => {
+            btn.addEventListener('click', () => setCategory(btn.dataset.cat));
+        });
+
+        searchInput.addEventListener('input', filterCards);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('q')) {
+            searchInput.value = urlParams.get('q');
+            filterCards();
+        }
+
+        updateFavUI();
+
+        // 4. Cookie-бар
+        if (!localStorage.getItem('cookie_ok')) {
+            document.getElementById('cookieBar').style.display = 'flex';
+        }
+        document.getElementById('acceptCookie').addEventListener('click', () => {
+            localStorage.setItem('cookie_ok', '1');
+            document.getElementById('cookieBar').style.display = 'none';
+        });
+
+        // 5. РСЯ
+        const RSY_HOME_BLOCK = '';
+        if (RSY_HOME_BLOCK) {
+            window.yaContextCb = window.yaContextCb || [];
+            window.yaContextCb.push(() => {
+                Ya.Context.AdvManager.render({ blockId: RSY_HOME_BLOCK, renderTo: 'yandex_rtb_home' });
+            });
+            setTimeout(() => {
+                const s = document.createElement('script');
+                s.src = 'https://yandex.ru/ads/system/context.js';
+                s.async = true;
+                document.body.appendChild(s);
+            }, 1200);
+        }
+    })();
+    </script>
+</body>
+</html>
