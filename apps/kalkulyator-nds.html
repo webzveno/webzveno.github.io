@@ -1,0 +1,677 @@
+---
+title: Калькулятор НДС онлайн — выделить или начислить 20%, 10%, 5%, 7%
+description: Бесплатный калькулятор НДС онлайн. Мгновенно выделить НДС из суммы или начислить налог 20%, 10%, 5% и 7% с выводом суммы прописью для счетов и договоров.
+category: Финансы
+keywords: налог на добавленную стоимость выделить ндс начислить ндс сумма прописью усн
+icon: ₽
+order: 1
+---
+{%- assign all_apps = site.pages | where_exp: "p", "p.path contains 'apps/'" -%}
+{%- assign categories = all_apps | map: "category" | compact | uniq | sort -%}
+{%- assign related_apps = all_apps | where: "category", page.category | where_exp: "p", "p.url != page.url" | limit: 4 -%}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#005bff">
+    <title>{{ page.title }}</title>
+    <meta name="description" content="{{ page.description }}">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ page.title }}">
+    <meta property="og:description" content="{{ page.description }}">
+    <meta property="og:url" content="{{ page.url | absolute_url }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": {{ page.title | jsonify }},
+          "description": {{ page.description | jsonify }},
+          "url": {{ page.url | absolute_url | jsonify }},
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "Any",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Главная", "item": {{ '/' | absolute_url | jsonify }} },
+            { "@type": "ListItem", "position": 2, "name": {{ page.category | jsonify }}, "item": {{ '/' | absolute_url | jsonify }} },
+            { "@type": "ListItem", "position": 3, "name": {{ page.title | jsonify }} }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Как выделить НДС 20% из суммы?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Чтобы выделить НДС 20% из суммы с налогом, разделите общую сумму на 1,2 и умножьте на 0,2 (или умножьте сумму на 20 и разделите на 120)." }
+            },
+            {
+              "@type": "Question",
+              "name": "Как начислить НДС 20% сверху на сумму?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Чтобы начислить НДС 20% на сумму без налога, умножьте исходную сумму на 0,2 для получения суммы налога или на 1,2 для получения итоговой суммы с НДС." }
+            },
+            {
+              "@type": "Question",
+              "name": "Какие ставки НДС действуют в России?",
+              "acceptedAnswer": { "@type": "Answer", "text": "В РФ применяются общие ставки 20% и 10% (на продукты, детские и медицинские товары), ставка 0% (экспорт), а также специальные ставки 5% и 7% для бизнеса на УСН." }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #005bff;
+            --primary-hover: #0046c7;
+            --bg: #f4f5f7;
+            --card: #ffffff;
+            --text: #1a1d20;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0 0 48px;
+            line-height: 1.55;
+        }
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .back-link {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-link:hover { color: var(--primary); }
+        .nav-right { display: flex; gap: 8px; align-items: center; position: relative; }
+        .btn-sm {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 7px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .cat-dropdown {
+            display: none;
+            position: absolute;
+            top: 42px;
+            right: 0;
+            width: 240px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 150;
+        }
+        .cat-dropdown.open { display: block; }
+        .cat-dropdown a {
+            display: block;
+            padding: 9px 12px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        .cat-dropdown a:hover { background: var(--bg); color: var(--primary); }
+
+        .wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 0; }
+        .breadcrumbs { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+        .breadcrumbs a { color: var(--muted); text-decoration: none; }
+        .breadcrumbs a:hover { color: var(--primary); }
+
+        h1 { font-size: 26px; margin: 0 0 8px; letter-spacing: -0.02em; }
+        .lead { color: var(--muted); font-size: 15px; margin: 0 0 16px; }
+
+        .rsy-slot {
+            min-height: 90px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .tool-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .mode-switch {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: var(--bg);
+            padding: 6px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            border: none;
+            background: transparent;
+            color: var(--text);
+            padding: 10px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .mode-btn.active { background: var(--primary); color: #fff; }
+
+        .field-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+        .amount-input {
+            width: 100%;
+            font-size: 24px;
+            font-weight: 700;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+        }
+        .amount-input:focus { border-color: var(--primary); }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0 20px;
+        }
+        .preset-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .preset-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .rates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+        .rate-btn {
+            flex: 1 1 70px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .rate-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .res-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .res-box:hover { border-color: var(--primary); }
+        .res-title { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+        .res-val { font-size: 20px; font-weight: 800; }
+
+        .words-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .seo-article {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        .seo-article h2 { font-size: 19px; margin: 0 0 12px; }
+        .seo-article h3 { font-size: 16px; margin: 18px 0 8px; }
+        .seo-article p, .seo-article li { font-size: 15px; color: var(--text); }
+
+        details {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            background: var(--bg);
+        }
+        summary { font-weight: 600; cursor: pointer; font-size: 15px; }
+        details p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .rel-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rel-card:hover { border-color: var(--primary); }
+
+        .disclaimer {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 22px; }
+            .tool-card, .seo-article { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="{{ '/' | relative_url }}" class="back-link">← Все инструменты</a>
+            <div class="nav-right">
+                <button class="btn-sm" id="shareBtn" type="button">Поделиться</button>
+                <button class="btn-sm" id="catMenuBtn" type="button">☰ Категории</button>
+                <button class="btn-sm" id="themeToggle" type="button" aria-label="Сменить тему">🌓</button>
+                <div class="cat-dropdown" id="catDropdown">
+                    <a href="{{ '/' | relative_url }}">Все сервисы ({{ all_apps.size }})</a>
+                    {%- for cat in categories -%}
+                        <a href="{{ '/' | relative_url }}?cat={{ cat | url_encode }}">{{ cat }}</a>
+                    {%- endfor -%}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <nav class="breadcrumbs" aria-label="Хлебные крошки">
+            <a href="{{ '/' | relative_url }}">Главная</a> → {{ page.category }} → Калькулятор НДС
+        </nav>
+
+        <h1>{{ page.title }}</h1>
+        <p class="lead">Быстрый расчет налога на добавленную стоимость: выделение из общей суммы или начисление сверху с готовой строкой прописью для счетов, актов и УПД.</p>
+
+        <div class="rsy-slot" id="yandex_rtb_top"></div>
+
+        <div class="tool-card">
+            <div class="mode-switch" role="tablist">
+                <button class="mode-btn active" data-mode="extract" type="button">Выделить НДС (из суммы)</button>
+                <button class="mode-btn" data-mode="add" type="button">Начислить НДС (сверху)</button>
+            </div>
+
+            <label class="field-label" for="amountInput">Сумма в рублях (₽):</label>
+            <input type="number" class="amount-input" id="amountInput" value="120000" min="0" step="0.01" inputmode="decimal">
+
+            <div class="presets">
+                <button class="preset-btn" data-val="10000" type="button">10 000 ₽</button>
+                <button class="preset-btn" data-val="50000" type="button">50 000 ₽</button>
+                <button class="preset-btn" data-val="120000" type="button">120 000 ₽</button>
+                <button class="preset-btn" data-val="1000000" type="button">1 000 000 ₽</button>
+            </div>
+
+            <span class="field-label">Ставка НДС:</span>
+            <div class="rates" role="radiogroup">
+                <button class="rate-btn active" data-rate="20" type="button">20%</button>
+                <button class="rate-btn" data-rate="10" type="button">10%</button>
+                <button class="rate-btn" data-rate="7" type="button">7% (УСН)</button>
+                <button class="rate-btn" data-rate="5" type="button">5% (УСН)</button>
+                <button class="rate-btn" data-rate="0" type="button">0%</button>
+            </div>
+
+            <div class="results-grid">
+                <div class="res-box" data-copy-target="resNoVat">
+                    <div class="res-title">Сумма без НДС (нажмите для копии)</div>
+                    <div class="res-val" id="resNoVat">100 000,00 ₽</div>
+                </div>
+                <div class="res-box" data-copy-target="resVat">
+                    <div class="res-title">Сумма НДС (<span id="rateLabel">20</span>%)</div>
+                    <div class="res-val" id="resVat">20 000,00 ₽</div>
+                </div>
+                <div class="res-box" data-copy-target="resWithVat">
+                    <div class="res-title">Итоговая сумма с НДС</div>
+                    <div class="res-val" id="resWithVat">120 000,00 ₽</div>
+                </div>
+            </div>
+
+            <div class="words-box" id="wordsOutput">Всего к оплате: Сто двадцать тысяч рублей 00 копеек, в том числе НДС 20% — двадцать тысяч рублей 00 копеек.</div>
+
+            <div class="actions">
+                <button class="btn-primary" id="copyAllBtn" type="button">Скопировать весь расчет</button>
+                <button class="btn-sm" id="clearBtn" type="button">Очистить</button>
+            </div>
+        </div>
+
+        <div class="rsy-slot" id="yandex_rtb_bottom"></div>
+
+        <section class="seo-article">
+            <h2>Как рассчитать НДС: формулы и примеры</h2>
+            <p>При оформлении счетов на оплату, договоров и закрывающих документов бухгалтерам и предпринимателям требуется либо выделить налог из уже известной цены, либо начислить его поверх базовой стоимости товара или услуги.</p>
+
+            <h3>1. Формула выделения НДС из суммы</h3>
+            <p>Если цена уже включает налог, применяется расчетная ставка (20/120, 10/110, 7/107 или 5/105):</p>
+            <ul>
+                <li><strong>НДС 20%:</strong> Сумма НДС = Общая сумма × 20 / 120</li>
+            </ul>
+            <p>Пример: Товар стоит 120 000 ₽ с учетом НДС 20%. Налог составит 120 000 × 20 / 120 = 20 000 ₽, а стоимость без налога — 100 000 ₽.</p>
+
+            <h3>2. Формула начисления НДС сверху</h3>
+            <p>Если известна чистая стоимость без налога, сумма умножается на процентную ставку:</p>
+            <ul>
+                <li><strong>НДС 20%:</strong> Сумма НДС = Сумма без НДС × 0,20</li>
+            </ul>
+            <p>Пример: Услуга стоит 50 000 ₽ без НДС (ставка УСН 5%). Налог составит 50 000 × 0,05 = 2 500 ₽, итого к оплате — 52 500 ₽.</p>
+
+            <h3>Частые вопросы (FAQ)</h3>
+            <details>
+                <summary>Как выделить НДС 20% из суммы?</summary>
+                <p>Разделите общую сумму с налогом на 1,2 и умножьте полученное значение на 0,2 (либо умножьте исходную сумму на 20 и разделите на 120).</p>
+            </details>
+            <details>
+                <summary>Как начислить НДС 20% сверху на сумму?</summary>
+                <p>Умножьте сумму без налога на 0,2 — вы получите величину налога. Чтобы сразу получить сумму с НДС, умножьте исходное число на 1,2.</p>
+            </details>
+            <details>
+                <summary>Какие ставки НДС действуют в России?</summary>
+                <p>В РФ действуют общие ставки 20% и 10% (на продукты питания, детские и медицинские товары), 0% при экспорте, а также специальные ставки 5% и 7% для компаний и ИП на УСН при превышении порога доходов.</p>
+            </details>
+        </section>
+
+        {%- if related_apps.size > 0 -%}
+        <section class="seo-article">
+            <h2>Похожие инструменты</h2>
+            <div class="related-grid">
+                {%- for rel in related_apps -%}
+                    <a class="rel-card" href="{{ rel.url | relative_url }}">
+                        <span>{{ rel.icon | default: "📱" }}</span>
+                        <span>{{ rel.title }}</span>
+                    </a>
+                {%- endfor -%}
+            </div>
+        </section>
+        {%- endif -%}
+
+        <p class="disclaimer">Расчеты носят информационно-справочный характер. При подготовке бухгалтерской отчетности проверяйте округление копеек по правилам учетной политики.</p>
+    </main>
+
+    <script>
+    (function () {
+        const root = document.documentElement;
+        if (localStorage.getItem('theme') === 'dark') root.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        });
+
+        const catDropdown = document.getElementById('catDropdown');
+        document.getElementById('catMenuBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            catDropdown.classList.toggle('open');
+        });
+        document.addEventListener('click', () => catDropdown.classList.remove('open'));
+
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                const btn = document.getElementById('shareBtn');
+                btn.textContent = 'Ссылка скопирована ✓';
+                setTimeout(() => btn.textContent = 'Поделиться', 2000);
+            } catch (_) {}
+        });
+
+        let mode = 'extract';
+        let rate = 20;
+        const amountInput = document.getElementById('amountInput');
+        const savedAmount = localStorage.getItem('nds_last_amount');
+        if (savedAmount) amountInput.value = savedAmount;
+
+        function formatMoney(num) {
+            return num.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
+        }
+
+        function numberToWordsRu(amount) {
+            const units    = ['', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'];
+            const unitsFem = ['', 'одна', 'две', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'];
+            const teens    = ['десять', 'одиннадцать', 'двенадцать', 'тринадцать', 'четырнадцать', 'пятнадцать', 'шестнадцать', 'семнадцать', 'восемнадцать', 'девятнадцать'];
+            const tens     = ['', '', 'двадцать', 'тридцать', 'сорок', 'пятьдесят', 'шестьдесят', 'семьдесят', 'восемьдесят', 'девяносто'];
+            const hundreds = ['', 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот', 'восемьсот', 'девятьсот'];
+
+            function decl(n, f1, f2, f5) {
+                n = Math.abs(n) % 100;
+                const n1 = n % 10;
+                if (n > 10 && n < 20) return f5;
+                if (n1 > 1 && n1 < 5) return f2;
+                if (n1 === 1) return f1;
+                return f5;
+            }
+            function triad(n, isFem) {
+                const res = [];
+                const h = Math.floor(n / 100);
+                const t = Math.floor((n % 100) / 10);
+                const u = n % 10;
+                if (h) res.push(hundreds[h]);
+                if (t === 1) {
+                    res.push(teens[u]);
+                } else {
+                    if (t) res.push(tens[t]);
+                    if (u) res.push((isFem ? unitsFem : units)[u]);
+                }
+                return res.join(' ');
+            }
+
+            const rub = Math.floor(amount);
+            const kop = Math.round((amount - rub) * 100);
+            const parts = [];
+            if (rub === 0) {
+                parts.push('ноль');
+            } else {
+                const mln  = Math.floor(rub / 1000000);
+                const ths  = Math.floor((rub % 1000000) / 1000);
+                const rest = rub % 1000;
+                if (mln) parts.push(triad(mln, false) + ' ' + decl(mln, 'миллион', 'миллиона', 'миллионов'));
+                if (ths) parts.push(triad(ths, true)  + ' ' + decl(ths, 'тысяча', 'тысячи', 'тысяч'));
+                if (rest) parts.push(triad(rest, false));
+            }
+            const rubWord = decl(rub, 'рубль', 'рубля', 'рублей');
+            const kopStr  = String(kop).padStart(2, '0');
+            const kopWord = decl(kop, 'копейка', 'копейки', 'копеек');
+            const full = `${parts.join(' ').trim()} ${rubWord} ${kopStr} ${kopWord}`;
+            return full.charAt(0).toUpperCase() + full.slice(1);
+        }
+
+        function calculate() {
+            const val = parseFloat(amountInput.value) || 0;
+            localStorage.setItem('nds_last_amount', val);
+
+            let noVat = 0, vat = 0, withVat = 0;
+            if (mode === 'extract') {
+                withVat = val;
+                vat = val * rate / (100 + rate);
+                noVat = withVat - vat;
+            } else {
+                noVat = val;
+                vat = val * rate / 100;
+                withVat = noVat + vat;
+            }
+
+            noVat   = Math.round(noVat * 100) / 100;
+            vat     = Math.round(vat * 100) / 100;
+            withVat = Math.round(withVat * 100) / 100;
+
+            document.getElementById('rateLabel').textContent = rate;
+            document.getElementById('resNoVat').textContent   = formatMoney(noVat);
+            document.getElementById('resVat').textContent     = formatMoney(vat);
+            document.getElementById('resWithVat').textContent = formatMoney(withVat);
+
+            const vatText = rate === 0
+                ? 'Без налога (НДС 0%).'
+                : `в том числе НДС ${rate}% — ${numberToWordsRu(vat).toLowerCase()}.`;
+
+            document.getElementById('wordsOutput').textContent =
+                `Всего к оплате: ${numberToWordsRu(withVat)}, ${vatText}`;
+        }
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                mode = btn.dataset.mode;
+                calculate();
+            });
+        });
+
+        document.querySelectorAll('.rate-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                rate = parseFloat(btn.dataset.rate);
+                calculate();
+            });
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                amountInput.value = btn.dataset.val;
+                calculate();
+            });
+        });
+
+        amountInput.addEventListener('input', calculate);
+
+        document.querySelectorAll('.res-box').forEach(box => {
+            box.addEventListener('click', async () => {
+                try {
+                    const text = document.getElementById(box.dataset.copyTarget).textContent;
+                    await navigator.clipboard.writeText(text);
+                    const titleEl = box.querySelector('.res-title');
+                    const old = titleEl.textContent;
+                    titleEl.textContent = 'Скопировано ✓';
+                    setTimeout(() => titleEl.textContent = old, 1500);
+                } catch (_) {}
+            });
+        });
+
+        document.getElementById('copyAllBtn').addEventListener('click', async () => {
+            const summary = `Сумма без НДС: ${document.getElementById('resNoVat').textContent}\nНДС (${rate}%): ${document.getElementById('resVat').textContent}\nИтого с НДС: ${document.getElementById('resWithVat').textContent}\n${document.getElementById('wordsOutput').textContent}`;
+            try {
+                await navigator.clipboard.writeText(summary);
+                const btn = document.getElementById('copyAllBtn');
+                btn.textContent = 'Скопировано ✓';
+                setTimeout(() => btn.textContent = 'Скопировать весь расчет', 2000);
+            } catch (_) {}
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            amountInput.value = '';
+            calculate();
+            amountInput.focus();
+        });
+
+        calculate();
+
+        const RSY_CONFIG = { top: '', bottom: '' };
+        if (RSY_CONFIG.top || RSY_CONFIG.bottom) {
+            window.yaContextCb = window.yaContextCb || [];
+            if (RSY_CONFIG.top) {
+                window.yaContextCb.push(() => Ya.Context.AdvManager.render({ blockId: RSY_CONFIG.top, renderTo: 'yandex_rtb_top' }));
+            }
+            if (RSY_CONFIG.bottom) {
+                window.yaContextCb.push(() => Ya.Context.AdvManager.render({ blockId: RSY_CONFIG.bottom, renderTo: 'yandex_rtb_bottom' }));
+            }
+            setTimeout(() => {
+                const s = document.createElement('script');
+                s.src = 'https://yandex.ru/ads/system/context.js';
+                s.async = true;
+                document.body.appendChild(s);
+            }, 1200);
+        }
+    })();
+    </script>
+</body>
+</html>
