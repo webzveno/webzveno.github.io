@@ -1,0 +1,518 @@
+---
+title: Подсчет символов и слов онлайн — счетчик знаков с пробелами и без
+description: Бесплатный счетчик символов, слов, строк и времени чтения текста онлайн. Проверка лимитов длины для Яндекс Директ, Telegram, ВК, SEO title и description.
+category: Текст
+keywords: количество символов длина текста знаки без пробелов счетчик слов лимит директ телеграм
+icon: 📝
+order: 2
+---
+{%- assign all_apps = site.pages | where_exp: "p", "p.path contains 'apps/'" -%}
+{%- assign categories = all_apps | map: "category" | compact | uniq | sort -%}
+{%- assign related_apps = all_apps | where: "category", page.category | where_exp: "p", "p.url != page.url" | limit: 4 -%}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#005bff">
+    <title>{{ page.title }}</title>
+    <meta name="description" content="{{ page.description }}">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <link rel="canonical" href="{{ page.url | absolute_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ page.title }}">
+    <meta property="og:description" content="{{ page.description }}">
+    <meta property="og:url" content="{{ page.url | absolute_url }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": {{ page.title | jsonify }},
+          "description": {{ page.description | jsonify }},
+          "url": {{ page.url | absolute_url | jsonify }},
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Главная", "item": {{ '/' | absolute_url | jsonify }} },
+            { "@type": "ListItem", "position": 2, "name": {{ page.category | jsonify }}, "item": {{ '/' | absolute_url | jsonify }} },
+            { "@type": "ListItem", "position": 3, "name": {{ page.title | jsonify }} }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Сколько символов вмещает пост в Telegram?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Обычный текстовый пост в Telegram вмещает до 4096 символов. Если к посту прикреплена картинка или видео, длина подписи ограничена 1024 символами (или 2048 с подпиской Premium)." }
+            },
+            {
+              "@type": "Question",
+              "name": "Какие лимиты символов в объявлениях Яндекс Директ?",
+              "acceptedAnswer": { "@type": "Answer", "text": "В Единой перфоманс-кампании Яндекс Директ первый заголовок вмещает до 56 символов, дополнительный заголовок — до 30 символов, а основной текст объявления — до 81 символа." }
+            },
+            {
+              "@type": "Question",
+              "name": "Какая оптимальная длина SEO тегов title и description?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Для корректного отображения в поиске Яндекса и Google рекомендуется составлять title длиной 50–70 символов, а meta description — 140–160 символов с пробелами." }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #005bff;
+            --bg: #f4f5f7;
+            --card: #ffffff;
+            --text: #1a1d20;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+            --ok: #10b981;
+            --warn: #ef4444;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0 0 48px;
+            line-height: 1.55;
+        }
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .back-link {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .back-link:hover { color: var(--primary); }
+        .nav-right { display: flex; gap: 8px; align-items: center; position: relative; }
+        .btn-sm {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 7px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .cat-dropdown {
+            display: none;
+            position: absolute;
+            top: 42px;
+            right: 0;
+            width: 240px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 150;
+        }
+        .cat-dropdown.open { display: block; }
+        .cat-dropdown a {
+            display: block;
+            padding: 9px 12px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        .cat-dropdown a:hover { background: var(--bg); color: var(--primary); }
+
+        .wrap { max-width: 860px; margin: 0 auto; padding: 20px 16px 0; }
+        .breadcrumbs { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+        .breadcrumbs a { color: var(--muted); text-decoration: none; }
+
+        h1 { font-size: 26px; margin: 0 0 8px; letter-spacing: -0.02em; }
+        .lead { color: var(--muted); font-size: 15px; margin: 0 0 16px; }
+
+        .rsy-slot {
+            min-height: 90px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .tool-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stat-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-num { font-size: 22px; font-weight: 800; color: var(--primary); }
+        .stat-lbl { font-size: 12px; color: var(--muted); }
+
+        .text-area {
+            width: 100%;
+            min-height: 200px;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 16px;
+            line-height: 1.5;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            resize: vertical;
+            outline: none;
+        }
+        .text-area:focus { border-color: var(--primary); }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 20px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .limits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+        }
+        .limit-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge-ok { color: var(--ok); font-weight: 700; }
+        .badge-over { color: var(--warn); font-weight: 700; }
+
+        .seo-article {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        .seo-article h2 { font-size: 19px; margin: 0 0 12px; }
+        .seo-article h3 { font-size: 16px; margin: 18px 0 8px; }
+
+        details {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            background: var(--bg);
+        }
+        summary { font-weight: 600; cursor: pointer; font-size: 15px; }
+        details p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .rel-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rel-card:hover { border-color: var(--primary); }
+
+        .disclaimer { font-size: 12px; color: var(--muted); margin-top: 24px; text-align: center; }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 22px; }
+            .tool-card, .seo-article { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="{{ '/' | relative_url }}" class="back-link">← Все инструменты</a>
+            <div class="nav-right">
+                <button class="btn-sm" id="shareBtn" type="button">Поделиться</button>
+                <button class="btn-sm" id="catMenuBtn" type="button">☰ Категории</button>
+                <button class="btn-sm" id="themeToggle" type="button" aria-label="Сменить тему">🌓</button>
+                <div class="cat-dropdown" id="catDropdown">
+                    <a href="{{ '/' | relative_url }}">Все сервисы ({{ all_apps.size }})</a>
+                    {%- for cat in categories -%}
+                        <a href="{{ '/' | relative_url }}?cat={{ cat | url_encode }}">{{ cat }}</a>
+                    {%- endfor -%}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <nav class="breadcrumbs" aria-label="Хлебные крошки">
+            <a href="{{ '/' | relative_url }}">Главная</a> → {{ page.category }} → Подсчет символов
+        </nav>
+
+        <h1>{{ page.title }}</h1>
+        <p class="lead">Мгновенный анализ объема текста: точное количество символов с пробелами и без, слов, строк, времени чтения и проверка лимитов рекламных и SEO-площадок.</p>
+
+        <div class="rsy-slot" id="yandex_rtb_top"></div>
+
+        <div class="tool-card">
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <div class="stat-num" id="cntAll">0</div>
+                    <div class="stat-lbl">Символов с пробелами</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="cntNoSpace">0</div>
+                    <div class="stat-lbl">Без пробелов</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="cntWords">0</div>
+                    <div class="stat-lbl">Слов</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="cntLines">0</div>
+                    <div class="stat-lbl">Строк</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="cntRead">0 сек</div>
+                    <div class="stat-lbl">Время чтения</div>
+                </div>
+            </div>
+
+            <label class="field-label" for="textInput" style="display:none;">Текст для анализа</label>
+            <textarea class="text-area" id="textInput" placeholder="Вставьте или напишите текст для анализа…" aria-label="Текст для анализа"></textarea>
+
+            <div class="toolbar">
+                <button class="btn-primary" id="copyTextBtn" type="button">Скопировать текст</button>
+                <button class="btn-sm" id="trimSpacesBtn" type="button">Убрать лишние пробелы</button>
+                <button class="btn-sm" id="clearBtn" type="button">Очистить</button>
+            </div>
+
+            <h3 style="font-size:16px;margin:8px 0 10px;">Лимиты символов</h3>
+            <div class="limits-grid" id="limitsGrid"></div>
+        </div>
+
+        <div class="rsy-slot" id="yandex_rtb_bottom"></div>
+
+        <section class="seo-article">
+            <h2>Зачем проверять длину текста и количество знаков</h2>
+            <p>Копирайтерам, SEO-специалистам и директологам важно укладываться в строгие технические ограничения площадок. Превышение лимита даже на один знак приводит к обрезке заголовка в поиске или отклонению рекламного объявления модерацией.</p>
+
+            <h3>Популярные лимиты символов в Рунете</h3>
+            <ul>
+                <li><strong>SEO Title:</strong> оптимально 50–70 символов с пробелами.</li>
+                <li><strong>SEO Description:</strong> оптимально 140–160 символов с пробелами.</li>
+                <li><strong>Яндекс Директ (Заголовок 1 / Текст):</strong> 56 символов / 81 символ.</li>
+                <li><strong>Telegram (пост с медиа / обычный пост):</strong> 1024 символа / 4096 символов.</li>
+            </ul>
+
+            <h3>Частые вопросы (FAQ)</h3>
+            <details>
+                <summary>Сколько символов вмещает пост в Telegram?</summary>
+                <p>Обычный текстовый пост вмещает до 4096 знаков. Если прикреплено фото или видео, подпись ограничена 1024 знаками (2048 с подпиской Premium).</p>
+            </details>
+            <details>
+                <summary>Какие лимиты символов в объявлениях Яндекс Директ?</summary>
+                <p>Первый заголовок вмещает до 56 знаков, дополнительный заголовок — до 30 знаков, а текст объявления — до 81 знака с учетом пробелов.</p>
+            </details>
+            <details>
+                <summary>Какая оптимальная длина SEO тегов title и description?</summary>
+                <p>Для корректного сниппета в Яндексе и Google рекомендуемая длина title составляет 50–70 знаков, а meta description — 140–160 знаков.</p>
+            </details>
+        </section>
+
+        {%- if related_apps.size > 0 -%}
+        <section class="seo-article">
+            <h2>Похожие инструменты</h2>
+            <div class="related-grid">
+                {%- for rel in related_apps -%}
+                    <a class="rel-card" href="{{ rel.url | relative_url }}">
+                        <span>{{ rel.icon | default: "📱" }}</span>
+                        <span>{{ rel.title }}</span>
+                    </a>
+                {%- endfor -%}
+            </div>
+        </section>
+        {%- endif -%}
+
+        <p class="disclaimer">Текст обрабатывается исключительно локально в вашем браузере и никуда не передается.</p>
+    </main>
+
+    <script>
+    (function () {
+        const root = document.documentElement;
+        if (localStorage.getItem('theme') === 'dark') root.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        });
+
+        const catDropdown = document.getElementById('catDropdown');
+        document.getElementById('catMenuBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            catDropdown.classList.toggle('open');
+        });
+        document.addEventListener('click', () => catDropdown.classList.remove('open'));
+
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                const btn = document.getElementById('shareBtn');
+                btn.textContent = 'Ссылка скопирована ✓';
+                setTimeout(() => btn.textContent = 'Поделиться', 2000);
+            } catch (_) {}
+        });
+
+        const textInput = document.getElementById('textInput');
+        const limits = [
+            { name: 'Директ Заголовок 1', max: 56 },
+            { name: 'SEO Title', max: 70 },
+            { name: 'Директ Текст', max: 81 },
+            { name: 'SEO Description', max: 160 },
+            { name: 'Telegram с фото', max: 1024 },
+            { name: 'Telegram пост', max: 4096 }
+        ];
+
+        function analyze() {
+            const text = textInput.value;
+            const totalChars = text.length;
+            const noSpaceChars = text.replace(/\s/g, '').length;
+            const wordsMatch = text.trim().match(/[\wа-яА-ЯёЁ-]+/g);
+            const wordsCount = wordsMatch ? wordsMatch.length : 0;
+            const linesCount = text.length === 0 ? 0 : text.split(/\r\n|\r|\n/).length;
+
+            const seconds = Math.ceil((wordsCount / 180) * 60);
+            const readTime = seconds < 60
+                ? `${seconds} сек`
+                : `${Math.floor(seconds / 60)} мин ${seconds % 60} сек`;
+
+            document.getElementById('cntAll').textContent     = totalChars.toLocaleString('ru-RU');
+            document.getElementById('cntNoSpace').textContent = noSpaceChars.toLocaleString('ru-RU');
+            document.getElementById('cntWords').textContent   = wordsCount.toLocaleString('ru-RU');
+            document.getElementById('cntLines').textContent   = linesCount.toLocaleString('ru-RU');
+            document.getElementById('cntRead').textContent    = readTime;
+
+            const limitsHtml = limits.map(l => {
+                const ok = totalChars <= l.max;
+                return `<div class="limit-item"><span>${l.name}</span><span class="${ok ? 'badge-ok' : 'badge-over'}">${totalChars} / ${l.max}</span></div>`;
+            }).join('');
+            document.getElementById('limitsGrid').innerHTML = limitsHtml;
+        }
+
+        textInput.addEventListener('input', analyze);
+
+        document.getElementById('trimSpacesBtn').addEventListener('click', () => {
+            textInput.value = textInput.value
+                .replace(/[ \t]+/g, ' ')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+            analyze();
+        });
+
+        document.getElementById('copyTextBtn').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(textInput.value);
+                const btn = document.getElementById('copyTextBtn');
+                btn.textContent = 'Скопировано ✓';
+                setTimeout(() => btn.textContent = 'Скопировать текст', 2000);
+            } catch (_) {}
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            textInput.value = '';
+            analyze();
+            textInput.focus();
+        });
+
+        analyze();
+
+        const RSY_CONFIG = { top: '', bottom: '' };
+        if (RSY_CONFIG.top || RSY_CONFIG.bottom) {
+            window.yaContextCb = window.yaContextCb || [];
+            if (RSY_CONFIG.top) {
+                window.yaContextCb.push(() => Ya.Context.AdvManager.render({ blockId: RSY_CONFIG.top, renderTo: 'yandex_rtb_top' }));
+            }
+            if (RSY_CONFIG.bottom) {
+                window.yaContextCb.push(() => Ya.Context.AdvManager.render({ blockId: RSY_CONFIG.bottom, renderTo: 'yandex_rtb_bottom' }));
+            }
+            setTimeout(() => {
+                const s = document.createElement('script');
+                s.src = 'https://yandex.ru/ads/system/context.js';
+                s.async = true;
+                document.body.appendChild(s);
+            }, 1200);
+        }
+    })();
+    </script>
+</body>
+</html>
