@@ -1,6 +1,6 @@
 ---
-title: Калькулятор НДС онлайн — выделить или начислить 20%, 10%, 5%, 7%
-description: Бесплатный калькулятор НДС онлайн. Мгновенно выделить НДС из суммы или начислить налог 20%, 10%, 5% и 7% с выводом суммы прописью для счетов и договоров.
+title: Калькулятор НДС онлайн — выделить или начислить 22%, 10%, 5%, 7%
+description: Бесплатный калькулятор НДС онлайн. Мгновенно выделить НДС из суммы или начислить налог 22%, 10%, 5% и 7% с выводом суммы прописью для счетов и договоров.
 category: Финансы
 keywords: налог на добавленную стоимость выделить ндс начислить ндс сумма прописью усн
 icon: ₽
@@ -50,18 +50,18 @@ order: 1
           "mainEntity": [
             {
               "@type": "Question",
-              "name": "Как выделить НДС 20% из суммы?",
-              "acceptedAnswer": { "@type": "Answer", "text": "Чтобы выделить НДС 20% из суммы с налогом, разделите общую сумму на 1,2 и умножьте на 0,2 (или умножьте сумму на 20 и разделите на 120)." }
+              "name": "Как выделить НДС 22% из суммы?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Чтобы выделить НДС 22% из суммы с налогом, разделите общую сумму на 1,22 и умножьте на 0,22 (или умножьте сумму на 22 и разделите на 122)." }
             },
             {
               "@type": "Question",
-              "name": "Как начислить НДС 20% сверху на сумму?",
-              "acceptedAnswer": { "@type": "Answer", "text": "Чтобы начислить НДС 20% на сумму без налога, умножьте исходную сумму на 0,2 для получения суммы налога или на 1,2 для получения итоговой суммы с НДС." }
+              "name": "Как начислить НДС 22% сверху на сумму?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Чтобы начислить НДС 22% на сумму без налога, умножьте исходную сумму на 0,22 для получения суммы налога или на 1,22 для получения итоговой суммы с НДС." }
             },
             {
               "@type": "Question",
-              "name": "Какие ставки НДС действуют в России?",
-              "acceptedAnswer": { "@type": "Answer", "text": "В РФ применяются общие ставки 20% и 10% (на продукты, детские и медицинские товары), ставка 0% (экспорт), а также специальные ставки 5% и 7% для бизнеса на УСН." }
+              "name": "Какие ставки НДС действуют в России в 2026 году?",
+              "acceptedAnswer": { "@type": "Answer", "text": "В 2026 году основная ставка НДС составляет 22%, сохраняются ставки 10% (для социально значимых товаров) и 0% (экспорт). Для бизнеса на УСН с доходом от 20 млн руб. доступны специальные ставки 5% и 7%." }
             }
           ]
         }
@@ -258,6 +258,32 @@ order: 1
             border-color: var(--primary);
         }
 
+        /* Добавленный стиль для поля ручного ввода ставки */
+        .custom-rate-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+        .custom-rate-input {
+            width: 120px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 700;
+            outline: none;
+            text-align: center;
+        }
+        .custom-rate-input:focus { border-color: var(--primary); }
+        .custom-rate-hint {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -378,7 +404,7 @@ order: 1
         <p class="lead">Быстрый расчет налога на добавленную стоимость: выделение из общей суммы или начисление сверху с готовой строкой прописью для счетов, актов и УПД.</p>
 
         <div class="rsy-slot" id="yandex_rtb_top"></div>
-<div class="rsy-slot" id="yandex_rtb_top"></div>
+
         <div class="tool-card">
             <div class="mode-switch" role="tablist">
                 <button class="mode-btn active" data-mode="extract" type="button">Выделить НДС (из суммы)</button>
@@ -397,21 +423,28 @@ order: 1
 
             <span class="field-label">Ставка НДС:</span>
             <div class="rates" role="radiogroup">
-                <button class="rate-btn active" data-rate="20" type="button">20%</button>
+                <button class="rate-btn active" data-rate="22" type="button">22%</button>
                 <button class="rate-btn" data-rate="10" type="button">10%</button>
                 <button class="rate-btn" data-rate="7" type="button">7% (УСН)</button>
                 <button class="rate-btn" data-rate="5" type="button">5% (УСН)</button>
                 <button class="rate-btn" data-rate="0" type="button">0%</button>
             </div>
 
+            <!-- Добавленное поле для ручного ввода ставки -->
+            <div class="custom-rate-wrap">
+                <label class="field-label" for="customRateInput" style="margin-bottom:0;">Своя ставка, %:</label>
+                <input type="number" class="custom-rate-input" id="customRateInput" value="22" min="0" max="100" step="0.1" inputmode="decimal">
+                <span class="custom-rate-hint">введите любой процент</span>
+            </div>
+
             <div class="results-grid">
                 <div class="res-box" data-copy-target="resNoVat">
                     <div class="res-title">Сумма без НДС (нажмите для копии)</div>
-                    <div class="res-val" id="resNoVat">100 000,00 ₽</div>
+                    <div class="res-val" id="resNoVat">98 360,66 ₽</div>
                 </div>
                 <div class="res-box" data-copy-target="resVat">
-                    <div class="res-title">Сумма НДС (<span id="rateLabel">20</span>%)</div>
-                    <div class="res-val" id="resVat">20 000,00 ₽</div>
+                    <div class="res-title">Сумма НДС (<span id="rateLabel">22</span>%)</div>
+                    <div class="res-val" id="resVat">21 639,34 ₽</div>
                 </div>
                 <div class="res-box" data-copy-target="resWithVat">
                     <div class="res-title">Итоговая сумма с НДС</div>
@@ -419,7 +452,7 @@ order: 1
                 </div>
             </div>
 
-            <div class="words-box" id="wordsOutput">Всего к оплате: Сто двадцать тысяч рублей 00 копеек, в том числе НДС 20% — двадцать тысяч рублей 00 копеек.</div>
+            <div class="words-box" id="wordsOutput">Всего к оплате: Сто двадцать тысяч рублей 00 копеек, в том числе НДС 22% — двадцать одна тысяча шестьсот тридцать девять рублей 34 копейки.</div>
 
             <div class="actions">
                 <button class="btn-primary" id="copyAllBtn" type="button">Скопировать весь расчет</button>
@@ -427,38 +460,38 @@ order: 1
             </div>
         </div>
 
-   <div class="rsy-slot" id="yandex_rtb_bottom"></div>
+        <div class="rsy-slot" id="yandex_rtb_bottom"></div>
 
         <section class="seo-article">
             <h2>Как рассчитать НДС: формулы и примеры</h2>
             <p>При оформлении счетов на оплату, договоров и закрывающих документов бухгалтерам и предпринимателям требуется либо выделить налог из уже известной цены, либо начислить его поверх базовой стоимости товара или услуги.</p>
 
             <h3>1. Формула выделения НДС из суммы</h3>
-            <p>Если цена уже включает налог, применяется расчетная ставка (20/120, 10/110, 7/107 или 5/105):</p>
+            <p>Если цена уже включает налог, применяется расчетная ставка (22/122, 10/110, 7/107 или 5/105):</p>
             <ul>
-                <li><strong>НДС 20%:</strong> Сумма НДС = Общая сумма × 20 / 120</li>
+                <li><strong>НДС 22%:</strong> Сумма НДС = Общая сумма × 22 / 122</li>
             </ul>
-            <p>Пример: Товар стоит 120 000 ₽ с учетом НДС 20%. Налог составит 120 000 × 20 / 120 = 20 000 ₽, а стоимость без налога — 100 000 ₽.</p>
+            <p>Пример: Товар стоит 122 000 ₽ с учетом НДС 22%. Налог составит 122 000 × 22 / 122 = 22 000 ₽, а стоимость без налога — 100 000 ₽.</p>
 
             <h3>2. Формула начисления НДС сверху</h3>
             <p>Если известна чистая стоимость без налога, сумма умножается на процентную ставку:</p>
             <ul>
-                <li><strong>НДС 20%:</strong> Сумма НДС = Сумма без НДС × 0,20</li>
+                <li><strong>НДС 22%:</strong> Сумма НДС = Сумма без НДС × 0,22</li>
             </ul>
             <p>Пример: Услуга стоит 50 000 ₽ без НДС (ставка УСН 5%). Налог составит 50 000 × 0,05 = 2 500 ₽, итого к оплате — 52 500 ₽.</p>
 
             <h3>Частые вопросы (FAQ)</h3>
             <details>
-                <summary>Как выделить НДС 20% из суммы?</summary>
-                <p>Разделите общую сумму с налогом на 1,2 и умножьте полученное значение на 0,2 (либо умножьте исходную сумму на 20 и разделите на 120).</p>
+                <summary>Как выделить НДС 22% из суммы?</summary>
+                <p>Разделите общую сумму с налогом на 1,22 и умножьте полученное значение на 0,22 (либо умножьте исходную сумму на 22 и разделите на 122).</p>
             </details>
             <details>
-                <summary>Как начислить НДС 20% сверху на сумму?</summary>
-                <p>Умножьте сумму без налога на 0,2 — вы получите величину налога. Чтобы сразу получить сумму с НДС, умножьте исходное число на 1,2.</p>
+                <summary>Как начислить НДС 22% сверху на сумму?</summary>
+                <p>Умножьте сумму без налога на 0,22 — вы получите величину налога. Чтобы сразу получить сумму с НДС, умножьте исходное число на 1,22.</p>
             </details>
             <details>
-                <summary>Какие ставки НДС действуют в России?</summary>
-                <p>В РФ действуют общие ставки 20% и 10% (на продукты питания, детские и медицинские товары), 0% при экспорте, а также специальные ставки 5% и 7% для компаний и ИП на УСН при превышении порога доходов.</p>
+                <summary>Какие ставки НДС действуют в России в 2026 году?</summary>
+                <p>В 2026 году основная ставка НДС составляет 22%, сохраняются ставки 10% (для социально значимых товаров) и 0% (экспорт). Для бизнеса на УСН с доходом от 20 млн руб. доступны специальные ставки 5% и 7%.</p>
             </details>
         </section>
 
@@ -506,8 +539,9 @@ order: 1
         });
 
         let mode = 'extract';
-        let rate = 20;
+        let rate = 22;
         const amountInput = document.getElementById('amountInput');
+        const customRateInput = document.getElementById('customRateInput');
         const savedAmount = localStorage.getItem('nds_last_amount');
         if (savedAmount) amountInput.value = savedAmount;
 
@@ -611,8 +645,22 @@ order: 1
                 document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 rate = parseFloat(btn.dataset.rate);
+                customRateInput.value = rate;
                 calculate();
             });
+        });
+
+        // Обработчик ручного ввода ставки
+        customRateInput.addEventListener('input', () => {
+            const customRate = parseFloat(customRateInput.value);
+            if (!isNaN(customRate) && customRate >= 0 && customRate <= 100) {
+                rate = customRate;
+                // Снимаем активный класс со всех кнопок, если введенная ставка не совпадает
+                document.querySelectorAll('.rate-btn').forEach(b => {
+                    b.classList.toggle('active', parseFloat(b.dataset.rate) === rate);
+                });
+                calculate();
+            }
         });
 
         document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -653,10 +701,12 @@ order: 1
             amountInput.focus();
         });
 
+        // Инициализация поля ручного ввода при загрузке
+        customRateInput.value = rate;
         calculate();
     })();
     </script>
 
-        <script src="{{ '/ads.js' | relative_url }}"></script>
+    <script src="{{ '/ads.js' | relative_url }}"></script>
 </body>
 </html>
